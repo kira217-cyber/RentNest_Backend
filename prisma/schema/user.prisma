@@ -1,0 +1,21 @@
+model User {
+  id        String     @id @default(cuid())
+  name      String
+  email     String     @unique
+  password  String
+  phone     String?
+  photo     String?
+  role      UserRole   @default(TENANT)
+  status    UserStatus @default(ACTIVE)
+
+  landlordProperties Property[]      @relation("LandlordProperties")
+  tenantRentals      RentalRequest[] @relation("TenantRentals")
+  reviews            Review[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([role])
+  @@index([status])
+  @@map("users")
+}
