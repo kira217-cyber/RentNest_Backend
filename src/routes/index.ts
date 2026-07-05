@@ -4,6 +4,7 @@ import { CategoryRoutes } from "../modules/category/category.route.js";
 import { PropertyRoutes } from "../modules/property/property.route.js";
 import { RentalRoutes } from "../modules/rental/rental.route.js";
 import { PaymentRoutes } from "../modules/payment/payment.route.js";
+import { ReviewRoutes } from "../modules/review/review.route.js";
 
 const router = Router();
 
@@ -19,5 +20,6 @@ router.use("/categories", CategoryRoutes);
 router.use("/properties", PropertyRoutes);
 router.use("/rentals", RentalRoutes);
 router.use("/payments", PaymentRoutes);
+router.use("/reviews", ReviewRoutes);
 
 export default router;
