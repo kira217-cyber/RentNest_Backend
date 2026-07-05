@@ -66,9 +66,35 @@ const getSingleProperty = catchAsync(async (req, res) => {
   });
 });
 
+const getAllRentals = catchAsync(async (req, res) => {
+  const result = await AdminService.getAllRentals(req.query);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Admin rentals retrieved successfully",
+    meta: result.meta,
+    data: result.data,
+  });
+});
+
+const getSingleRental = catchAsync(async (req, res) => {
+  const id = getParamId(req.params.id);
+  const result = await AdminService.getSingleRental(id);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Admin rental details retrieved successfully",
+    data: result,
+  });
+});
+
 export const AdminController = {
   getAllUsers,
   updateUserStatus,
   getAllProperties,
   getSingleProperty,
+  getAllRentals,
+  getSingleRental,
 };

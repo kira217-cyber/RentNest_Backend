@@ -28,4 +28,16 @@ router.get(
   AdminController.getSingleProperty,
 );
 
+router.get(
+  "/rentals",
+  auth(UserRole.ADMIN),
+  AdminController.getAllRentals,
+);
+
+router.get(
+  "/rentals/:id",
+  auth(UserRole.ADMIN),
+  AdminController.getSingleRental,
+);
+
 export const AdminRoutes = router;

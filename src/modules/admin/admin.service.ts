@@ -240,9 +240,170 @@ const getSingleProperty = async (id: string) => {
   return property;
 };
 
+type TAdminRentalQuery = {
+  page?: string;
+  limit?: string;
+  search?: string;
+  status?: string;
+  tenantId?: string;
+  propertyId?: string;
+};
+
+const getAllRentals = async (query: TAdminRentalQuery) => {
+  const page = Number(query.page) || 1;
+  const limit = Number(query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const andConditions: Prisma.RentalRequestWhereInput[] = [];
+
+  if (query.search) {
+    andConditions.push({
+      OR: [
+        {
+          tenant: {
+            name: { contains: query.search, mode: "insensitive" },
+          },
+        },
+        {
+          tenant: {
+            email: { contains: query.search, mode: "insensitive" },
+          },
+        },
+        {
+          property: {
+            title: { contains: query.search, mode: "insensitive" },
+          },
+        },
+        {
+          property: {
+            location: { contains: query.search, mode: "insensitive" },
+          },
+        },
+      ],
+    });
+  }
+
+  if (query.status) {
+    andConditions.push({
+      status: query.status as any,
+    });
+  }
+
+  if (query.tenantId) {
+    andConditions.push({
+      tenantId: query.tenantId,
+    });
+  }
+
+  if (query.propertyId) {
+    andConditions.push({
+      propertyId: query.propertyId,
+    });
+  }
+
+  const whereConditions: Prisma.RentalRequestWhereInput =
+    andConditions.length > 0 ? { AND: andConditions } : {};
+
+  const [data, total] = await Promise.all([
+    prisma.rentalRequest.findMany({
+      where: whereConditions,
+      skip,
+      take: limit,
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        tenant: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            status: true,
+          },
+        },
+        property: {
+          include: {
+            category: true,
+            landlord: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true,
+                status: true,
+              },
+            },
+          },
+        },
+        payment: true,
+      },
+    }),
+
+    prisma.rentalRequest.count({
+      where: whereConditions,
+    }),
+  ]);
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+      totalPage: Math.ceil(total / limit),
+    },
+    data,
+  };
+};
+
+const getSingleRental = async (id: string) => {
+  const rental = await prisma.rentalRequest.findUnique({
+    where: {
+      id,
+    },
+    include: {
+      tenant: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          photo: true,
+          status: true,
+          createdAt: true,
+        },
+      },
+      property: {
+        include: {
+          category: true,
+          landlord: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              phone: true,
+              photo: true,
+              status: true,
+            },
+          },
+        },
+      },
+      payment: true,
+    },
+  });
+
+  if (!rental) {
+    throw new AppError(httpStatus.NOT_FOUND, "Rental request not found");
+  }
+
+  return rental;
+};
+
 export const AdminService = {
   getAllUsers,
   updateUserStatus,
   getAllProperties,
   getSingleProperty,
+  getAllRentals,
+  getSingleRental,
 };
