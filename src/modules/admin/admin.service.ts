@@ -1,5 +1,6 @@
 import httpStatus from "http-status";
 import { Prisma, UserRole, UserStatus } from "@prisma/client";
+import { PaymentStatus, PropertyStatus, RentalStatus } from "@prisma/client";
 import AppError from "../../errors/AppError.js";
 import prisma from "../../lib/prisma.js";
 
@@ -399,6 +400,104 @@ const getSingleRental = async (id: string) => {
   return rental;
 };
 
+const getDashboardStats = async () => {
+  const [
+    totalUsers,
+    totalTenants,
+    totalLandlords,
+    totalProperties,
+    availableProperties,
+    rentedProperties,
+    totalRentals,
+    pendingRentals,
+    approvedRentals,
+    activeRentals,
+    completedRentals,
+    totalPayments,
+    completedPayments,
+    revenueResult,
+  ] = await Promise.all([
+    prisma.user.count(),
+    prisma.user.count({ where: { role: UserRole.TENANT } }),
+    prisma.user.count({ where: { role: UserRole.LANDLORD } }),
+
+    prisma.property.count(),
+    prisma.property.count({ where: { status: PropertyStatus.AVAILABLE } }),
+    prisma.property.count({ where: { status: PropertyStatus.RENTED } }),
+
+    prisma.rentalRequest.count(),
+    prisma.rentalRequest.count({ where: { status: RentalStatus.PENDING } }),
+    prisma.rentalRequest.count({ where: { status: RentalStatus.APPROVED } }),
+    prisma.rentalRequest.count({ where: { status: RentalStatus.ACTIVE } }),
+    prisma.rentalRequest.count({ where: { status: RentalStatus.COMPLETED } }),
+
+    prisma.payment.count(),
+    prisma.payment.count({ where: { status: PaymentStatus.COMPLETED } }),
+
+    prisma.payment.aggregate({
+      where: { status: PaymentStatus.COMPLETED },
+      _sum: { amount: true },
+    }),
+  ]);
+
+  const recentUsers = await prisma.user.findMany({
+    take: 5,
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      status: true,
+      createdAt: true,
+    },
+  });
+
+  const recentRentals = await prisma.rentalRequest.findMany({
+    take: 5,
+    orderBy: { createdAt: "desc" },
+    include: {
+      tenant: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      property: {
+        select: {
+          id: true,
+          title: true,
+          location: true,
+          price: true,
+        },
+      },
+      payment: true,
+    },
+  });
+
+  return {
+    overview: {
+      totalUsers,
+      totalTenants,
+      totalLandlords,
+      totalProperties,
+      availableProperties,
+      rentedProperties,
+      totalRentals,
+      pendingRentals,
+      approvedRentals,
+      activeRentals,
+      completedRentals,
+      totalPayments,
+      completedPayments,
+      totalRevenue: Number(revenueResult._sum.amount || 0),
+    },
+    recentUsers,
+    recentRentals,
+  };
+};
+
 export const AdminService = {
   getAllUsers,
   updateUserStatus,
@@ -406,4 +505,5 @@ export const AdminService = {
   getSingleProperty,
   getAllRentals,
   getSingleRental,
+  getDashboardStats,
 };

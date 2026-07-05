@@ -90,6 +90,17 @@ const getSingleRental = catchAsync(async (req, res) => {
   });
 });
 
+const getDashboardStats = catchAsync(async (req, res) => {
+  const result = await AdminService.getDashboardStats();
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Admin dashboard statistics retrieved successfully",
+    data: result,
+  });
+});
+
 export const AdminController = {
   getAllUsers,
   updateUserStatus,
@@ -97,4 +108,5 @@ export const AdminController = {
   getSingleProperty,
   getAllRentals,
   getSingleRental,
+  getDashboardStats,
 };
