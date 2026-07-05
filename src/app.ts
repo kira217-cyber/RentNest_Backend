@@ -2,6 +2,7 @@ import cors from "cors";
 import express, { type Application, type Request, type Response } from "express";
 import httpStatus from "http-status";
 import globalErrorHandler from "./middlewares/globalErrorHandler.js";
+import router from "./routes/index.js";
 
 const app: Application = express();
 
@@ -16,14 +17,18 @@ app.get("/", (req: Request, res: Response) => {
   });
 });
 
+app.use("/api", router);
+
 app.use((req: Request, res: Response) => {
   res.status(httpStatus.NOT_FOUND).json({
     success: false,
     message: "API route not found",
-    errorDetails: {
-      path: req.originalUrl,
-      method: req.method,
-    },
+    errorDetails: [
+      {
+        path: req.originalUrl,
+        message: `Cannot ${req.method} ${req.originalUrl}`,
+      },
+    ],
   });
 });
 
