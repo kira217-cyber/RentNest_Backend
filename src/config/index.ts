@@ -22,10 +22,11 @@ const config = {
     secretKey: process.env.STRIPE_SECRET_KEY,
     webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
   },
-
   client: {
-    successUrl: process.env.CLIENT_SUCCESS_URL,
-    cancelUrl: process.env.CLIENT_CANCEL_URL,
+    successUrl:
+      process.env.CLIENT_SUCCESS_URL || "http://localhost:3000/payment/success",
+    cancelUrl:
+      process.env.CLIENT_CANCEL_URL || "http://localhost:3000/payment/cancel",
   },
 };
 

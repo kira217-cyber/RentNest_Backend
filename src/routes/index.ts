@@ -3,6 +3,7 @@ import { AuthRoutes } from "../modules/auth/auth.route.js";
 import { CategoryRoutes } from "../modules/category/category.route.js";
 import { PropertyRoutes } from "../modules/property/property.route.js";
 import { RentalRoutes } from "../modules/rental/rental.route.js";
+import { PaymentRoutes } from "../modules/payment/payment.route.js";
 
 const router = Router();
 
@@ -17,5 +18,6 @@ router.use("/auth", AuthRoutes);
 router.use("/categories", CategoryRoutes);
 router.use("/properties", PropertyRoutes);
 router.use("/rentals", RentalRoutes);
+router.use("/payments", PaymentRoutes);
 
 export default router;
