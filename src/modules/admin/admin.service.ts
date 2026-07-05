@@ -105,7 +105,144 @@ const updateUserStatus = async (adminId: string, userId: string, status: UserSta
   return result;
 };
 
+type TAdminPropertyQuery = {
+  page?: string;
+  limit?: string;
+  search?: string;
+  location?: string;
+  categoryId?: string;
+  status?: string;
+  landlordId?: string;
+};
+
+const getAllProperties = async (query: TAdminPropertyQuery) => {
+  const page = Number(query.page) || 1;
+  const limit = Number(query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const andConditions: Prisma.PropertyWhereInput[] = [];
+
+  if (query.search) {
+    andConditions.push({
+      OR: [
+        { title: { contains: query.search, mode: "insensitive" } },
+        { description: { contains: query.search, mode: "insensitive" } },
+        { location: { contains: query.search, mode: "insensitive" } },
+      ],
+    });
+  }
+
+  if (query.location) {
+    andConditions.push({
+      location: { contains: query.location, mode: "insensitive" },
+    });
+  }
+
+  if (query.categoryId) andConditions.push({ categoryId: query.categoryId });
+
+  if (query.status) {
+    andConditions.push({
+      status: query.status as any,
+    });
+  }
+
+  if (query.landlordId) andConditions.push({ landlordId: query.landlordId });
+
+  const whereConditions: Prisma.PropertyWhereInput =
+    andConditions.length > 0 ? { AND: andConditions } : {};
+
+  const [data, total] = await Promise.all([
+    prisma.property.findMany({
+      where: whereConditions,
+      skip,
+      take: limit,
+      orderBy: { createdAt: "desc" },
+      include: {
+        category: true,
+        landlord: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            status: true,
+          },
+        },
+        _count: {
+          select: {
+            rentalRequests: true,
+            reviews: true,
+          },
+        },
+      },
+    }),
+    prisma.property.count({ where: whereConditions }),
+  ]);
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+      totalPage: Math.ceil(total / limit),
+    },
+    data,
+  };
+};
+
+const getSingleProperty = async (id: string) => {
+  const property = await prisma.property.findUnique({
+    where: { id },
+    include: {
+      category: true,
+      landlord: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          status: true,
+        },
+      },
+      rentalRequests: {
+        include: {
+          tenant: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              phone: true,
+            },
+          },
+          payment: true,
+        },
+        orderBy: { createdAt: "desc" },
+      },
+      reviews: {
+        include: {
+          tenant: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      },
+    },
+  });
+
+  if (!property) {
+    throw new AppError(httpStatus.NOT_FOUND, "Property not found");
+  }
+
+  return property;
+};
+
 export const AdminService = {
   getAllUsers,
   updateUserStatus,
+  getAllProperties,
+  getSingleProperty,
 };

@@ -42,7 +42,33 @@ const updateUserStatus = catchAsync(async (req, res) => {
   });
 });
 
+const getAllProperties = catchAsync(async (req, res) => {
+  const result = await AdminService.getAllProperties(req.query);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Admin properties retrieved successfully",
+    meta: result.meta,
+    data: result.data,
+  });
+});
+
+const getSingleProperty = catchAsync(async (req, res) => {
+  const id = getParamId(req.params.id);
+  const result = await AdminService.getSingleProperty(id);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Admin property details retrieved successfully",
+    data: result,
+  });
+});
+
 export const AdminController = {
   getAllUsers,
   updateUserStatus,
+  getAllProperties,
+  getSingleProperty,
 };
