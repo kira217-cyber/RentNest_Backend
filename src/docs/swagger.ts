@@ -1,4 +1,5 @@
 import swaggerJSDoc from "swagger-jsdoc";
+import { swaggerPaths } from "./swagger.paths.js";
 
 const swaggerDefinition = {
   openapi: "3.0.0",
@@ -18,6 +19,15 @@ const swaggerDefinition = {
       description: "Production server",
     },
   ],
+  tags: [
+    { name: "Auth" },
+    { name: "Categories" },
+    { name: "Properties" },
+    { name: "Rentals" },
+    { name: "Payments" },
+    { name: "Reviews" },
+    { name: "Admin" },
+  ],
   components: {
     securitySchemes: {
       bearerAuth: {
@@ -27,11 +37,12 @@ const swaggerDefinition = {
       },
     },
   },
+  paths: swaggerPaths,
 };
 
 const options = {
   definition: swaggerDefinition,
-  apis: ["./src/modules/**/*.route.ts", "./src/docs/**/*.ts"],
+  apis: [],
 };
 
 const swaggerSpec = swaggerJSDoc(options);
