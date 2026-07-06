@@ -1,16 +1,10 @@
 {
   "version": 2,
   "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "functions": {
-    "api/index.ts": {
-      "runtime": "@vercel/node@latest"
-    }
-  },
   "routes": [
     {
       "src": "/(.*)",
       "dest": "/api/index.ts"
     }
   ]
-}
+}npm run build
