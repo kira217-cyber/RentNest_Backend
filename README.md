@@ -13,15 +13,15 @@ Admins can manage users, properties, rentals, categories and monitor platform st
 # 🚀 Live API
 
 ```
-https://your-api.vercel.app
+https://rentnest-backend.vercel.app
 ```
 
 ---
 
-# 📄 Swagger Documentation
+# 📄 Postman Documentation
 
 ```
-https://your-api.vercel.app/api-docs
+https://documenter.getpostman.com/view/55085333/2sBY4Jv2Tr
 ```
 
 ---
