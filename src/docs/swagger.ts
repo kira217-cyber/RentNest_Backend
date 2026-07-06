@@ -15,7 +15,7 @@ const swaggerDefinition = {
       description: "Local server",
     },
     {
-      url: "https://your-live-api-url.vercel.app",
+      url: "https://rentnest-backend.vercel.app",
       description: "Production server",
     },
   ],
