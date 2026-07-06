@@ -2,6 +2,8 @@ import cors from "cors";
 import express, { type Application, type Request, type Response } from "express";
 import httpStatus from "http-status";
 import cookieParser from "cookie-parser";
+import swaggerUi from "swagger-ui-express";
+import swaggerSpec from "./docs/swagger.js";
 import globalErrorHandler from "./middlewares/globalErrorHandler.js";
 import router from "./routes/index.js";
 
@@ -21,6 +23,8 @@ app.get("/", (req: Request, res: Response) => {
     message: "RentNest API is running successfully",
   });
 });
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use("/api", router);
 
